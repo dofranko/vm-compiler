@@ -2,6 +2,7 @@
 import ply.yacc as yacc
 from comp_lex import *
 from variables import *
+from commander import *
 
 
 def add_variable(pid):
@@ -26,6 +27,10 @@ def add_variable_array(pid, start, end):
         custom_error("Duplikat pid juz istnieje")
 
 
+def load_variable(pid):
+    return variables[pid]
+
+
 precedence = (
     ('left', 'ADD', 'SUB'),
     ('left', 'DIV', 'MUL'),
@@ -39,6 +44,8 @@ precedence = (
 
 def p_declare_begin_end(p):
     '''program : DECLARE declarations BEGIN commands END'''
+    prog = Program(p[4])
+    prog.execute_commands()
     pass
 
 
@@ -76,12 +83,13 @@ def p_declare_array(p):
 
 def p_commands_commands_command(p):
     '''commands : commands command'''
-    pass
+    p[0] = list(p[1]) if p[1] else []
+    p[0].append(p[2])
 
 
 def p_commands_command(p):
     '''commands : command'''
-    pass
+    p[0] = [p[1]]
 
 #--------- COMMAND
 
@@ -123,12 +131,13 @@ def p_command_for_from_downto_do(p):
 
 def p_command_read(p):
     '''command : READ identifier SEMICOLON'''
+    p[0] = ReadCommand(p[2])
     pass
 
 
 def p_command_write(p):
     '''command : WRITE identifier SEMICOLON'''
-    pass
+    p[0] = WriteCommand(p[2])
 
 #--------- EXPRESSION
 
@@ -200,18 +209,20 @@ def p_condition_ge(p):
 
 def p_value_num(p):
     '''value : NUM'''
+    p[0] = p[1]
     pass
 
 
 def p_value_identifier(p):
     '''value : identifier'''
+    p[0] = p[1]
     pass
 
 
 #--------- IDENTIFIER
 def p_identifier_PIDENTIFIER(p):
     '''identifier : PIDENTIFIER'''
-    pass
+    p[0] = load_variable(p[1])
 
 
 def p_identifier_array_PIDENTIFIER(p):
