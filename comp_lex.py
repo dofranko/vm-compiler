@@ -10,7 +10,7 @@ states = (
 )
 # Tokens
 tokens = (
-    'NUM', 'PID',
+    'NUM', 'PIDENTIFIER',
 
     'SUB', 'ADD',
     'MUL', 'DIV',
@@ -25,16 +25,14 @@ tokens = (
     'REPEAT', 'UNTIL',
     'FOR', 'FROM', 'TO', 'DOWNTO', 'ENDFOR',
 
-    'READ', 'WRITE'
+    'READ', 'WRITE',
     'LBR', 'RBR',
 
-    'ENDL',
     'DECLARE', 'BEGIN', 'END'
 )
 
 # Simple rules
 
-t_PID = r'[_a-z]+'
 t_ADD = r'\+'
 t_SUB = r'-'
 t_MUL = r'\*'
@@ -67,9 +65,10 @@ t_READ = r'READ'
 t_WRITE = r'WRITE'
 t_LBR = r'\('
 t_RBR = r'\)'
-t_DECLARE = r'DECLARR'
+t_DECLARE = r'DECLARE'
 t_BEGIN = r'BEGIN'
 t_END = 'END'
+t_PIDENTIFIER = r'[_a-z]+'
 
 t_ignore = ' \t'
 t_comment_ignore = ''
@@ -78,27 +77,18 @@ t_comment_ignore = ''
 
 
 def t_begin_comment(t):
-    r'['
+    r'\['
     t.lexer.begin('comment')
 
 
-def t_comment_noend(t):
-    r'\\\n'
-    pass
-
-
-def t_comment_endline(t):
-    r'\n'
+def t_comment_end(t):
+    r'\]'
     t.lexer.begin('INITIAL')
+    pass
 
 
 def t_comment_any(t):
     r'.'
-    pass
-
-
-def t_continue_line(t):
-    r'\\\n'
     pass
 
 
@@ -108,14 +98,9 @@ def t_NUM(t):
     return t
 
 
-def t_ENDL(t):
-    r'\n'
+def t_newline(t):
+    r'\n+'
     t.lexer.lineno += len(t.value)
-    return t
-
-
-def t_eof(t):
-    global finished
 
 
 # Error handling rules

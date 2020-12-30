@@ -1,6 +1,30 @@
 # Load lex file
-from zadlex import *
 import ply.yacc as yacc
+from comp_lex import *
+from variables import *
+
+
+def add_variable(pid):
+    global next_free_memory_location
+    if pid not in variables.keys():
+        var = Variable(pid)
+        var.memory_location = next_free_memory_location
+        next_free_memory_location += 1
+        variables[var.pid] = var
+    else:
+        custom_error("Duplikat pid juz istnieje")
+
+
+def add_variable_array(pid, start, end):
+    global next_free_memory_location
+    if pid not in variables.keys():
+        var = VariableArray(pid, start, end)
+        var.memory_location = next_free_memory_location
+        next_free_memory_location += var.length
+        variables[var.pid] = var
+    else:
+        custom_error("Duplikat pid juz istnieje")
+
 
 precedence = (
     ('left', 'ADD', 'SUB'),
@@ -14,195 +38,189 @@ precedence = (
 
 
 def p_declare_begin_end(p):
-    '''program: DECLARE declarations BEGIN commands END'''
+    '''program : DECLARE declarations BEGIN commands END'''
     pass
 
 
 def p_begin_end(p):
-    '''program: BEGIN commands END'''
+    '''program : BEGIN commands END'''
     pass
 
 #--------- DECLARATIONS
 
 
 def p_declarations_pididentifier(p):
-    '''declarations: declarations COMMA pidentifier'''
+    '''declarations : declarations COMMA PIDENTIFIER'''
+    add_variable(p[3])
     pass
 
 
 def p_declarations_pididentifier_array(p):
-    '''declarations: declarations COMMA pidentifier LBR NUM COLON NUM RBR'''
+    '''declarations : declarations COMMA PIDENTIFIER LBR NUM COLON NUM RBR'''
     pass
 
 
 def p_declare_pididentifier(p):
-    '''declarations: pidentifier'''
+    '''declarations : PIDENTIFIER'''
+    add_variable(p[1])
     pass
 
 
 def p_declare_array(p):
-    '''declarations: pidentifier'''
+    '''declarations : PIDENTIFIER LBR NUM COLON NUM RBR '''
+    add_variable_array(p[1], p[3], p[5])
     pass
 
 #--------- COMMANDS
 
 
 def p_commands_commands_command(p):
-    '''commands: commands command'''
+    '''commands : commands command'''
     pass
 
 
 def p_commands_command(p):
-    '''commands: command'''
+    '''commands : command'''
     pass
 
 #--------- COMMAND
 
 
 def p_command_identifier_expression(p):
-    '''command: identifier ASSIGN expression SEMICOLON'''
-    pass
-
-
-def p_command_identifier_expression(p):
-    '''command: identifier ASSIGN expression SEMICOLON'''
+    '''command : identifier ASSIGN expression SEMICOLON'''
     pass
 
 
 def p_command_if_then_else(p):
-    '''command: IF condition THEN commands ELSE commands ENDIF'''
+    '''command : IF condition THEN commands ELSE commands ENDIF'''
     pass
 
 
 def p_command_if_then(p):
-    '''command: IF condition THEN commands ENDIF'''
+    '''command : IF condition THEN commands ENDIF'''
     pass
 
 
 def p_command_while_do(p):
-    '''command: WHILE condition DO commands ENDWHILE'''
+    '''command : WHILE condition DO commands ENDWHILE'''
     pass
 
 
 def p_command_repeat_until(p):
-    '''command: REPEAT commands UNTIL condition SEMICOLON'''
+    '''command : REPEAT commands UNTIL condition SEMICOLON'''
     pass
 
 
 def p_command_for_from_to_do(p):
-    '''command: FOR pidentifier FROM value TO value DO commands ENDFOR'''
+    '''command : FOR PIDENTIFIER FROM value TO value DO commands ENDFOR'''
     pass
 
 
 def p_command_for_from_downto_do(p):
-    '''command: FOR pidentifier FROM value DOWNTO value DO commands ENDFOR'''
+    '''command : FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR'''
     pass
 
 
 def p_command_read(p):
-    '''command: READ identifier SEMICOLON'''
+    '''command : READ identifier SEMICOLON'''
     pass
 
 
 def p_command_write(p):
-    '''command: WRITE identifier SEMICOLON'''
+    '''command : WRITE identifier SEMICOLON'''
     pass
 
 #--------- EXPRESSION
 
 
 def p_expression_value(p):
-    '''expression: value'''
+    '''expression : value'''
     pass
 
 
 def p_expression_value_add(p):
-    '''expression: value ADD value'''
+    '''expression : value ADD value'''
     pass
 
 
 def p_expression_value_sub(p):
-    '''expression: value SUB value'''
+    '''expression : value SUB value'''
     pass
 
 
-def p_expression_value_MUL(p):
-    '''expression: value MUL value'''
+def p_expression_value_mul(p):
+    '''expression : value MUL value'''
     pass
 
 
 def p_expression_value_div(p):
-    '''expression: value DIV value'''
+    '''expression : value DIV value'''
     pass
 
 
 def p_expression_value_mod(p):
-    '''expression: value MOD value'''
+    '''expression : value MOD value'''
     pass
 
-
-def p_expression_value_add(p):
-    '''expression: value ADD value'''
-    pass
 
 #--------- CONDITION
 
 
 def p_condition_eq(p):
-    '''condition: value EQ value'''
+    '''condition : value EQ value'''
     pass
 
 
 def p_condition_neq(p):
-    '''condition: value NEQ value'''
+    '''condition : value NEQ value'''
     pass
 
 
 def p_condition_lt(p):
-    '''condition: value LT value'''
+    '''condition : value LT value'''
     pass
 
 
 def p_condition_gt(p):
-    '''condition: value GT value'''
+    '''condition : value GT value'''
     pass
 
 
 def p_condition_le(p):
-    '''condition: value LE value'''
+    '''condition : value LE value'''
     pass
 
 
 def p_condition_ge(p):
-    '''condition: value GE value'''
+    '''condition : value GE value'''
     pass
 
 #--------- VALUE
 
 
 def p_value_num(p):
-    '''value: num'''
+    '''value : NUM'''
     pass
 
 
 def p_value_identifier(p):
-    '''value: identifier'''
+    '''value : identifier'''
     pass
 
 
 #--------- IDENTIFIER
-def p_identifier_pidentifier(p):
-    '''identifier: pidentifier'''
+def p_identifier_PIDENTIFIER(p):
+    '''identifier : PIDENTIFIER'''
     pass
 
 
-def p_identifier_array_pidentifier_(p):
-    '''identifier: pidentifier'''
+def p_identifier_array_PIDENTIFIER(p):
+    '''identifier : PIDENTIFIER LBR PIDENTIFIER RBR'''
     pass
 
 
 def p_identifier_array_num(p):
-    '''identifier: pidentifier'''
+    '''identifier : PIDENTIFIER LBR NUM RBR'''
     pass
 
 # ----------------------------------------
@@ -221,15 +239,17 @@ def p_error(p):
 
 # Globals
 flg_error = 0       # Flaga erroru - czy był bład, czy nie
+next_free_memory_location = 0
+variables = {}
 
+# Starting lex and yacc
 if __name__ == '__main__':
-    # Starting lex and yacc
     from sys import argv
 
     lex.lex()
     yacc.yacc()
     data = ""
-    with open(argv[2], "r") as file:
+    with open(argv[1], "r") as file:
         data = file.read()
 
     yacc.parse(data)
