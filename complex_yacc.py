@@ -96,6 +96,7 @@ def p_commands_command(p):
 
 def p_command_identifier_expression(p):
     '''command : identifier ASSIGN expression SEMICOLON'''
+    p[0] = AssignCommand(p[1], p[3])
     pass
 
 
@@ -144,31 +145,37 @@ def p_command_write(p):
 
 def p_expression_value(p):
     '''expression : value'''
+    p[0] = ValueExpression(p[1])
     pass
 
 
 def p_expression_value_add(p):
     '''expression : value ADD value'''
+    p[0] = AddExpression(p[1], p[3])
     pass
 
 
 def p_expression_value_sub(p):
     '''expression : value SUB value'''
+    p[0] = SubExpression(p[1], p[3])
     pass
 
 
 def p_expression_value_mul(p):
     '''expression : value MUL value'''
+    p[0] = MulExpression(p[1], p[3])
     pass
 
 
 def p_expression_value_div(p):
     '''expression : value DIV value'''
+    p[0] = DivExpression(p[1], p[3])
     pass
 
 
 def p_expression_value_mod(p):
     '''expression : value MOD value'''
+    p[0] = ModExpression(p[1], p[3])
     pass
 
 
@@ -209,13 +216,13 @@ def p_condition_ge(p):
 
 def p_value_num(p):
     '''value : NUM'''
-    p[0] = p[1]
+    p[0] = p[1]  # p[1] should be as int
     pass
 
 
 def p_value_identifier(p):
     '''value : identifier'''
-    p[0] = p[1]
+    p[0] = p[1]  # p[1] should be as Variable
     pass
 
 
