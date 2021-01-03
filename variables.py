@@ -9,6 +9,7 @@ class Variable:
         self.memory_location = -1
 
 
+
 class VariableArray(Variable):
 
     def __init__(self, pid, start, end):

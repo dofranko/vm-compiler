@@ -16,7 +16,7 @@ class Program:
         for i in self.commands:
             if isinstance(i, Command):
                 i.generate_code()
-                print(i.code)
+                print("\n".join(i.code))
 
 
 class Command:
@@ -55,23 +55,6 @@ class ReadCommand(Command):
         self.code.append("GET " + "a")
 
 
-class AssignCommand(Command):
-
-    def __init__(self, pid_to_assign, expression: Expression):
-        self.variable = variable
-        self.expression = expression
-        self.code = []
-
-    def generate_code(self):
-        self.generate_code("b")
-
-    def generate_code(self, register):
-        self.code = self.expression.generate_code("register")
-        self.code.extend(load_value_to_register(
-            self.variable.memory_location, "a"))
-        self.code.append("STORE " + register + " a")
-
-
 class Expression:
 
     def __init__(self, variable):
@@ -83,6 +66,23 @@ class Expression:
 
     def generate_code(self, register):
         pass
+
+
+class AssignCommand(Command):
+
+    def __init__(self, variable, expression: Expression):
+        self.variable = variable
+        self.expression = expression
+        self.code = []
+
+    def generate_code(self):
+        self.generate_code("b")
+
+    def generate_code(self, register="b"):
+        self.code = self.expression.generate_code("b")
+        self.code.extend(load_value_to_register(
+            self.variable.memory_location, "a"))
+        self.code.append("STORE " + register + " a")
 
 
 class ValueExpression(Expression):
@@ -128,7 +128,7 @@ class AddExpression(Expression):
             if type(self.variable1) == Variable and type(self.variable2) == Variable:
                 code = load_variable_to_register(self.variable1, register)
                 code.extend(load_variable_to_register(
-                    self.variable2), second_register)
+                    self.variable2, second_register))
                 code.append("ADD " + register + " " + second_register)
                 return code
 
@@ -164,7 +164,7 @@ class SubExpression(Expression):
             if type(self.variable1) == Variable and type(self.variable2) == Variable:
                 code = load_variable_to_register(self.variable1, register)
                 code.extend(load_variable_to_register(
-                    self.variable2), second_register)
+                    self.variable2, second_register))
                 code.append("SUB " + register + " " + second_register)
                 return code
 
@@ -208,7 +208,7 @@ class MulExpression(Expression):
             if type(self.variable1) == Variable and type(self.variable2) == Variable:
                 code = load_variable_to_register(self.variable1, register)
                 code.extend(load_variable_to_register(
-                    self.variable2), second_register)
+                    self.variable2, second_register))
                 code.append("RESET a")
                 code.append("JZERO c 4")
                 code.append("ADD a b")
@@ -266,7 +266,7 @@ class DivExpression(Expression):
             if type(self.variable1) == Variable and type(self.variable2) == Variable:
                 code = load_variable_to_register(self.variable1, register)
                 code.extend(load_variable_to_register(
-                    self.variable2), second_register)
+                    self.variable2, second_register))
                 code.append("RESET a")
                 code.append("JZERO b 9")
                 code.append("RESET d")
@@ -327,7 +327,7 @@ class ModExpression(Expression):
             if type(self.variable1) == Variable and type(self.variable2) == Variable:
                 code = load_variable_to_register(self.variable1, register)
                 code.extend(load_variable_to_register(
-                    self.variable2), second_register)
+                    self.variable2, second_register))
                 code.append("JZERO b ile")
                 code.append("RESET c")
                 code.append("ADD c a ")
@@ -356,15 +356,15 @@ def load_variable_to_register(variable: Variable, register):
 
 def generate_number(value: int, register):
     if value <= 0:
-        return
+        return []
     elif value == 1:
         return ["INC " + register]
     else:
         code = []
         value_in_binary = str(bin(value)[2:])
-        for i in range(length(value_in_binary)):
+        for i in range(len(value_in_binary)):
             if value_in_binary[i] == "1":
                 code.append("INC " + register)
-            if i < length(value_in_binary - 1):
+            if i < len(value_in_binary) - 1:
                 code.append("ADD " + register + " " + register)
     return code

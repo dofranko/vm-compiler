@@ -3,6 +3,7 @@ import ply.yacc as yacc
 from comp_lex import *
 from variables import *
 from commander import *
+from conditioner import *
 
 
 def add_variable(pid):
@@ -46,37 +47,35 @@ def p_declare_begin_end(p):
     '''program : DECLARE declarations BEGIN commands END'''
     prog = Program(p[4])
     prog.execute_commands()
-    pass
 
 
 def p_begin_end(p):
     '''program : BEGIN commands END'''
-    pass
+    prog = Program(p[4])
+    prog.execute_commands()
+
 
 #--------- DECLARATIONS
-
 
 def p_declarations_pididentifier(p):
     '''declarations : declarations COMMA PIDENTIFIER'''
     add_variable(p[3])
-    pass
 
 
 def p_declarations_pididentifier_array(p):
     '''declarations : declarations COMMA PIDENTIFIER LBR NUM COLON NUM RBR'''
-    pass
+    add_variable_array(p[3], p[5], p[7])
 
 
 def p_declare_pididentifier(p):
     '''declarations : PIDENTIFIER'''
     add_variable(p[1])
-    pass
 
 
 def p_declare_array(p):
     '''declarations : PIDENTIFIER LBR NUM COLON NUM RBR '''
     add_variable_array(p[1], p[3], p[5])
-    pass
+
 
 #--------- COMMANDS
 
@@ -97,7 +96,6 @@ def p_commands_command(p):
 def p_command_identifier_expression(p):
     '''command : identifier ASSIGN expression SEMICOLON'''
     p[0] = AssignCommand(p[1], p[3])
-    pass
 
 
 def p_command_if_then_else(p):
@@ -133,7 +131,6 @@ def p_command_for_from_downto_do(p):
 def p_command_read(p):
     '''command : READ identifier SEMICOLON'''
     p[0] = ReadCommand(p[2])
-    pass
 
 
 def p_command_write(p):
@@ -146,37 +143,31 @@ def p_command_write(p):
 def p_expression_value(p):
     '''expression : value'''
     p[0] = ValueExpression(p[1])
-    pass
 
 
 def p_expression_value_add(p):
     '''expression : value ADD value'''
     p[0] = AddExpression(p[1], p[3])
-    pass
 
 
 def p_expression_value_sub(p):
     '''expression : value SUB value'''
     p[0] = SubExpression(p[1], p[3])
-    pass
 
 
 def p_expression_value_mul(p):
     '''expression : value MUL value'''
     p[0] = MulExpression(p[1], p[3])
-    pass
 
 
 def p_expression_value_div(p):
     '''expression : value DIV value'''
     p[0] = DivExpression(p[1], p[3])
-    pass
 
 
 def p_expression_value_mod(p):
     '''expression : value MOD value'''
     p[0] = ModExpression(p[1], p[3])
-    pass
 
 
 #--------- CONDITION
@@ -184,32 +175,32 @@ def p_expression_value_mod(p):
 
 def p_condition_eq(p):
     '''condition : value EQ value'''
-    pass
+    p[0] = EqualsCondition(p[1], [3])
 
 
 def p_condition_neq(p):
     '''condition : value NEQ value'''
-    pass
+    p[0] = NotEqualsCondition(p[1], p[3])
 
 
 def p_condition_lt(p):
     '''condition : value LT value'''
-    pass
+    p[0] = LessCondition(p[1], p[3])
 
 
 def p_condition_gt(p):
     '''condition : value GT value'''
-    pass
+    p[0] = GreaterCondition(p[1], p[3])
 
 
 def p_condition_le(p):
     '''condition : value LE value'''
-    pass
+    p[0] = LessEqualsCondition(p[1], p[3])
 
 
 def p_condition_ge(p):
     '''condition : value GE value'''
-    pass
+    p[0] = GreaterEqualsCondition(p[1], p[3])
 
 #--------- VALUE
 
@@ -217,13 +208,11 @@ def p_condition_ge(p):
 def p_value_num(p):
     '''value : NUM'''
     p[0] = p[1]  # p[1] should be as int
-    pass
 
 
 def p_value_identifier(p):
     '''value : identifier'''
     p[0] = p[1]  # p[1] should be as Variable
-    pass
 
 
 #--------- IDENTIFIER
