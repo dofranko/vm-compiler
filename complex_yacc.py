@@ -100,22 +100,22 @@ def p_command_identifier_expression(p):
 
 def p_command_if_then_else(p):
     '''command : IF condition THEN commands ELSE commands ENDIF'''
-    pass
+    p[0] = IfElseCommand(p[2], p[4], p[6])
 
 
 def p_command_if_then(p):
     '''command : IF condition THEN commands ENDIF'''
-    pass
+    p[0] = IfCommand(p[2], p[4])
 
 
 def p_command_while_do(p):
     '''command : WHILE condition DO commands ENDWHILE'''
-    pass
+    p[0] = WhileCommand(p[2], p[4])
 
 
 def p_command_repeat_until(p):
     '''command : REPEAT commands UNTIL condition SEMICOLON'''
-    pass
+    p[0] = RepeatCommand(p[4], p[2])
 
 
 def p_command_for_from_to_do(p):
@@ -175,7 +175,7 @@ def p_expression_value_mod(p):
 
 def p_condition_eq(p):
     '''condition : value EQ value'''
-    p[0] = EqualsCondition(p[1], [3])
+    p[0] = EqualsCondition(p[1], p[3])
 
 
 def p_condition_neq(p):
