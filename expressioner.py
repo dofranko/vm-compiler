@@ -3,10 +3,7 @@ from helping_functions import *
 
 class Expression:
 
-    def __init__(self, variable):
-        self.variable1 = variable
-
-    def __init__(self, variable1, variable2):
+    def __init__(self, variable1, variable2=None):
         self.variable1 = variable1
         self.variable2 = variable2
 

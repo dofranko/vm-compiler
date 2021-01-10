@@ -9,19 +9,17 @@ from conditioner import *
 def add_variable(pid):
     global next_free_memory_location
     if pid not in variables.keys():
-        var = Variable(pid)
-        var.memory_location = next_free_memory_location
+        var = Variable(pid, next_free_memory_location)
         next_free_memory_location += 1
         variables[var.pid] = var
     else:
         custom_error("Duplikat pid juz istnieje")
 
 
-def add_variable_array(pid, start, end):
+def add_array_of_variables(pid, start, end):
     global next_free_memory_location
-    if pid not in variables.keys():
-        var = VariableArray(pid, start, end)
-        var.memory_location = next_free_memory_location
+    if pid not in variables:
+        var = ArrayOfVariables(pid, next_free_memory_location, start, end)
         next_free_memory_location += var.length
         variables[var.pid] = var
     else:
@@ -29,7 +27,35 @@ def add_variable_array(pid, start, end):
 
 
 def load_variable(pid):
+    if pid not in variables:
+        variables_to_check_later.append(pid)
+        return pid
+    if isinstance(variables[pid], ArrayOfVariables):
+        custom_error("Odwołanie się do tablicy jak do zmiennej")
     return variables[pid]
+
+
+def load_variable_from_array(pid, position):
+    if type(position) == int:
+        array = load_variable(pid)
+        try:
+            return array.at_index(position)
+        except IndexError:
+            custom_error("Index poza zasięgiem")
+    elif isinstance(position, Variable):
+        pass
+
+
+def initialize_variable(variable):
+    if type(variable) == Variable:
+        variable.is_initialized = True
+
+
+def check_initialization(variable):
+    if type(variable) == Variable:
+        if not variable.is_initialized:
+            custom_error("Zmienna " + variable.pid +
+                         " nie jest zainicjalizowana")
 
 
 precedence = (
@@ -45,13 +71,15 @@ precedence = (
 
 def p_declare_begin_end(p):
     '''program : DECLARE declarations BEGIN commands END'''
-    prog = Program(p[4])
+    # TODO Check array iterators
+    prog = Program(p[4], variables, next_free_memory_location)
     prog.execute_commands()
 
 
 def p_begin_end(p):
     '''program : BEGIN commands END'''
-    prog = Program(p[4])
+    # TODO check iterators
+    prog = Program(p[4], variables, next_free_memory_location)
     prog.execute_commands()
 
 
@@ -64,7 +92,7 @@ def p_declarations_pididentifier(p):
 
 def p_declarations_pididentifier_array(p):
     '''declarations : declarations COMMA PIDENTIFIER LBR NUM COLON NUM RBR'''
-    add_variable_array(p[3], p[5], p[7])
+    add_array_of_variables(p[3], p[5], p[7])
 
 
 def p_declare_pididentifier(p):
@@ -74,7 +102,7 @@ def p_declare_pididentifier(p):
 
 def p_declare_array(p):
     '''declarations : PIDENTIFIER LBR NUM COLON NUM RBR '''
-    add_variable_array(p[1], p[3], p[5])
+    add_array_of_variables(p[1], p[3], p[5])
 
 
 #--------- COMMANDS
@@ -95,6 +123,11 @@ def p_commands_command(p):
 
 def p_command_identifier_expression(p):
     '''command : identifier ASSIGN expression SEMICOLON'''
+    if type(p[1]) == str and p[1] in variables_to_check_later:
+        custom_error("Nie mozna przypisac do iteratora: " + p[1])
+    elif type(p[1]) == str:
+        custom_error("Nie mozna przypisac do zmiennej " + p[1])
+    initialize_variable(p[1])
     p[0] = AssignCommand(p[1], p[3])
 
 
@@ -120,21 +153,35 @@ def p_command_repeat_until(p):
 
 def p_command_for_from_to_do(p):
     '''command : FOR PIDENTIFIER FROM value TO value DO commands ENDFOR'''
-    pass
+    while p[2] in variables_to_check_later:
+        variables_to_check_later.remove(p[2])
+    check_initialization(p[4])
+    check_initialization(p[6])
+    p[0] = ForCommand(p[2], p[4], p[6], p[8])
 
 
 def p_command_for_from_downto_do(p):
     '''command : FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR'''
-    pass
+    while p[2] in variables_to_check_later:
+        variables_to_check_later.remove(p[2])
+    check_initialization(p[4])
+    check_initialization(p[6])
+    p[0] = ForDownCommand(p[2], p[4], p[6], p[8])
 
 
 def p_command_read(p):
     '''command : READ identifier SEMICOLON'''
+    if type(p[2]) == str and p[2] in variables_to_check_later:
+        custom_error("Nie mozna przypisac do iteratora: " + p[2])
+    elif type(p[2]) == str:
+        custom_error("Nie mozna przypisac do zmiennej " + p[2])
+    initialize_variable(p[2])
     p[0] = ReadCommand(p[2])
 
 
 def p_command_write(p):
     '''command : WRITE identifier SEMICOLON'''
+    check_initialization(p[2])
     p[0] = WriteCommand(p[2])
 
 #--------- EXPRESSION
@@ -142,31 +189,42 @@ def p_command_write(p):
 
 def p_expression_value(p):
     '''expression : value'''
+    check_initialization(p[1])
     p[0] = ValueExpression(p[1])
 
 
 def p_expression_value_add(p):
     '''expression : value ADD value'''
+    check_initialization(p[1])
+    check_initialization(p[3])
     p[0] = AddExpression(p[1], p[3])
 
 
 def p_expression_value_sub(p):
     '''expression : value SUB value'''
+    check_initialization(p[1])
+    check_initialization(p[3])
     p[0] = SubExpression(p[1], p[3])
 
 
 def p_expression_value_mul(p):
     '''expression : value MUL value'''
+    check_initialization(p[1])
+    check_initialization(p[3])
     p[0] = MulExpression(p[1], p[3])
 
 
 def p_expression_value_div(p):
     '''expression : value DIV value'''
+    check_initialization(p[1])
+    check_initialization(p[3])
     p[0] = DivExpression(p[1], p[3])
 
 
 def p_expression_value_mod(p):
     '''expression : value MOD value'''
+    check_initialization(p[1])
+    check_initialization(p[3])
     p[0] = ModExpression(p[1], p[3])
 
 
@@ -212,7 +270,7 @@ def p_value_num(p):
 
 def p_value_identifier(p):
     '''value : identifier'''
-    p[0] = p[1]  # p[1] should be as Variable
+    p[0] = p[1]  # p[1] should be as Variable or str (when unknown variable - maybe iterator)
 
 
 #--------- IDENTIFIER
@@ -223,12 +281,12 @@ def p_identifier_PIDENTIFIER(p):
 
 def p_identifier_array_PIDENTIFIER(p):
     '''identifier : PIDENTIFIER LBR PIDENTIFIER RBR'''
-    pass
+    p[0] = load_variable_from_array(p[1], p[3])
 
 
 def p_identifier_array_num(p):
     '''identifier : PIDENTIFIER LBR NUM RBR'''
-    pass
+    p[0] = load_variable_from_array(p[1], p[3])
 
 # ----------------------------------------
 
@@ -248,6 +306,8 @@ def p_error(p):
 flg_error = 0       # Flaga erroru - czy był bład, czy nie
 next_free_memory_location = 0
 variables = {}
+variables_to_check_later = []
+
 
 # Starting lex and yacc
 if __name__ == '__main__':
