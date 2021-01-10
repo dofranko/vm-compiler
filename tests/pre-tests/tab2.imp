@@ -1,0 +1,87 @@
+[ tab2.imp - tablice 
+
+    OUTPUT:
+        > 10
+        > 20
+        > 30
+        > 40
+        > 50
+        > 111111111
+        > 2
+        > 4
+        > 6
+        > 8
+        > 10
+        > 111111111
+        > 100
+        > 80
+        > 60
+        > 40
+        > 20
+        > 200
+        > 160
+        > 120
+        > 80
+        > 40
+        > 300
+        > 240
+        > 180
+        > 120
+        > 60
+        > 400
+        > 320
+        > 240
+        > 160
+        > 80
+        > 500
+        > 400
+        > 300
+        > 200
+        > 100
+]
+DECLARE
+	n, m, j, z, ta(0:4), tb(0:4), tc(0:24)
+BEGIN
+	n := 25 - 1;
+	m := 5 - 1;
+	z := 0;	
+
+	FOR i FROM z TO m DO
+		j := i + 1;
+		ta(i) := 9 * j;
+		tb(i) := 6 * j;
+		tb(i) := tb(i) / 3;
+		ta(i) := j + ta(i);
+     ENDFOR
+	
+     FOR i FROM z TO m DO
+		WRITE ta(i);
+	ENDFOR
+
+	WRITE 111111111;
+
+	FOR i FROM z TO m DO
+		WRITE tb(i);
+	ENDFOR
+
+	WRITE 111111111;
+
+	FOR i FROM z TO m DO
+		FOR k FROM m DOWNTO z DO
+			FOR l FROM z TO n DO
+				j := 5 * i;
+                j := j + 4;
+                j := j - k;
+				IF j = l THEN
+					tc(l) := ta(i) * tb(k);
+				ENDIF
+			ENDFOR
+		ENDFOR
+	ENDFOR
+
+	FOR i FROM z TO n DO
+		WRITE tc(i);
+	ENDFOR
+
+END
+

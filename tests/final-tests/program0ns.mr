@@ -1,0 +1,1 @@
+(zapis binarny liczby)RESETa(p[0]<-0)STOREaaINCa(p[1]<-1)STOREaaINCa(p[2]<-read n)GETaLOADaa(a<-p[2])RESETb(b<-0)ADDba(b<-a/2)SHRbSHLb(b<-b*2)RESETc(c<-a-b [a>b])ADDcaSUBcbJZEROc5(not a>b)RESETdINCdPUTd(write p[1])JUMP3RESETdPUTd(write p[0])SHRa(a<-a/2)JZEROa2(a=0-until)JUMP-16(goto repeat)HALT

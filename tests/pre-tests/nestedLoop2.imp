@@ -1,0 +1,47 @@
+[ nestedLoop2.imp - petle while 
+
+        Przykladowe dane testowe:
+        1. ? 111111
+           ? 2222
+           > 512
+           > 111111
+           > 2222
+           > 236361
+           > 12222
+]
+DECLARE
+	a, b, i, j, acc, accb
+BEGIN
+	READ a;
+	READ b;
+	j := 512;
+ 	i := 1;
+	acc := 0;
+	accb := 0;
+
+	WRITE j;
+	
+	acc := a;  [ acc = a ]
+	accb := b; [ accb = b ]
+	
+	WHILE i <= 1000 DO 			[ if i % 2 == 0 then acc += i/2 ]
+		j := i % 2;
+		IF 1 != j THEN
+			j := i / 2;
+			acc := acc + j;
+		ENDIF
+		j := 0;
+		WHILE 10 > j DO
+			accb := 2 + accb;
+			accb := accb - 1;
+			j := j + 1;
+		ENDWHILE				[ accb += 10 ]
+		i := i + 1;
+	ENDWHILE					[ acc += 125250; accb := 10000 ]
+
+	WRITE a;
+	WRITE b;
+	WRITE acc;  [ acc = a + 125250 ]
+	WRITE accb; [ accb = b + 10000 ]
+END
+

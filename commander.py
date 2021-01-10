@@ -13,8 +13,9 @@ class Program:
     def __init__(self):
         self.commands = []
 
-    def __init__(self, commands: list, variables_dict: dict, next_free_memory_location: int):
+    def __init__(self, commands: list, variables_dict: dict, next_free_memory_location: int, output_file_name: str):
         self.commands = commands
+        self.output_file_name = output_file_name
         Program.variables = variables_dict
         Program.next_free_memory_location = next_free_memory_location
 
@@ -22,10 +23,18 @@ class Program:
         self.commands.append(command)
 
     def execute_commands(self):
-        for i in self.commands:
-            if isinstance(i, Command):
-                i.generate_code()
-                print("\n".join(i.code))
+        self.commands.append(HaltCommand())
+        try:
+            code = ""
+            for i in self.commands:
+                if isinstance(i, Command):
+                    i.generate_code()
+                    code += "\n".join(i.code) + "\n"
+                    print("\n".join(i.code))
+            with open(self.output_file_name, "w") as file:
+                file.write(code)
+        except Exception as e:
+            print(e)
 
 
 class Command:
@@ -35,6 +44,15 @@ class Command:
 
     def generate_code(self):
         pass
+
+
+class HaltCommand(Command):
+
+    def __init__(self):
+        self.code = []
+
+    def generate_code(self):
+        self.code = ["HALT"]
 
 
 class WriteCommand(Command):
@@ -60,7 +78,7 @@ class ReadCommand(Command):
 
     def generate_code(self):
         self.code = load_value_to_register(
-            self.variable, "a")
+            self.variable.memory_location, "a")
         self.code.append("GET " + "a")
 
 
@@ -258,14 +276,15 @@ class ForDownCommand(Command):
         self.code.append(jump_code)
         remove_iterator(my_iterator)
 
+# TODO nie wiem co
+
 
 def add_iterator(pid, start, end):
     iterator = VariableIterator(
         pid, Program.next_free_memory_location, start, end)
     Program.next_free_memory_location += 2
-    if [
-            el for el in commander.Program.iterators_stack if el.pid == value][0]
-    Program.iterators_stack.append(iterator)
+    if [el for el in commander.Program.iterators_stack if el.pid == value][0]:
+        Program.iterators_stack.append(iterator)
     if pid in Program.variables:
         Program.variables[pid].is_shadowed = True
         Program.variables[pid].reference_to_iterator = iterator

@@ -1,0 +1,24 @@
+[ factorial2.imp - obliczanie n! dla n podanego przez uzytkownika 
+
+        Przykladowe dane testowe:
+        1. ? 100
+           > {jak w factorial1.imp}
+        2. ? 1000
+           > {jak w factorial1.imp}
+]
+[ 
+    Czas wykonywania tego programu nie powinien istotnie roznic sie 
+    od czasu wykonywania factorial1.imp /dla tych samych n/.
+]
+DECLARE
+    fact, n 
+BEGIN
+	READ n;
+    fact := 1;
+	FOR k FROM 1 TO n DO
+		fact := k * fact;
+	ENDFOR
+	WRITE fact;
+
+	[ Liczy n! ]
+END

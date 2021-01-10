@@ -1,0 +1,9 @@
+[ Błąd w linii 3: nierozpoznany napis /niepoprawna deklaracja tablicy/ ]
+DECLARE
+  a, b(10)
+BEGIN
+  FOR i FROM 0 TO 10 DO 
+    b(i) := i;
+  ENDFOR
+  a := b(1);
+END

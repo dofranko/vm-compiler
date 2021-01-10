@@ -1,0 +1,26 @@
+(zapis binarny liczby)
+RESET a		(p[0] <- 0)
+STORE a a
+INC a		(p[1] <- 1)
+STORE a a
+INC a		(p[2] <- read n)
+GET a
+LOAD a a	(a <- p[2])
+RESET b		(b <- 0)
+ADD b a		(b <- a/2)
+SHR b
+SHL b		(b <- b*2)
+RESET c		(c <- a-b [a>b])
+ADD c a
+SUB c b
+JZERO c 5	(not a>b)
+RESET d
+INC d
+PUT d		(write p[1])
+JUMP 3
+RESET d
+PUT d		(write p[0])
+SHR a		(a <- a/2)
+JZERO a 2	(a=0 - until)
+JUMP -16	(goto repeat)
+HALT

@@ -1,0 +1,46 @@
+RESET a		(generowanie 100)
+INC a
+SHL a
+INC a
+SHL a
+SHL a
+SHL a
+INC a
+SHL a
+SHL a
+RESET b		(generowanie 1)
+INC b
+RESET c		(i:=n)
+ADD c a
+RESET d		(licznik dla for)
+ADD d a
+DEC d		(licznik--)
+JZERO d 4	(wyjście z for)
+STORE b c	(sito[i]:=1)
+DEC c		(i--)
+JUMP -4		(powrót do for)
+RESET c		(i:=2)
+INC c
+INC c
+RESET d		(licznik dla for)
+ADD d a
+DEC d		(licznik--)
+JZERO d 18	(wyjście z for)
+LOAD e c
+JZERO e 14	(sito[i]=0)
+RESET f		(j:=i)
+ADD f c
+ADD f c		(j+=i)
+RESET b		(j<=n ?)
+ADD b a
+INC b
+SUB b f
+JZERO b 4	(wyjście z while)
+RESET b		(sito[j]:=0)
+STORE b f
+JUMP -8		(powrót do while)
+STORE c b	(write i)
+PUT b
+INC c		(i++)
+JUMP -18	(powrót do for)
+HALT

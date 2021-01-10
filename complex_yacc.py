@@ -71,15 +71,17 @@ precedence = (
 
 def p_declare_begin_end(p):
     '''program : DECLARE declarations BEGIN commands END'''
-    # TODO Check array iterators
-    prog = Program(p[4], variables, next_free_memory_location)
+    if len(variables_to_check_later) != 0:
+        custom_error("Brak deklaracji zmiennej " + variables_to_check_later[0])
+    prog = Program(p[4], variables, next_free_memory_location, output_file_name)
     prog.execute_commands()
 
 
 def p_begin_end(p):
     '''program : BEGIN commands END'''
-    # TODO check iterators
-    prog = Program(p[4], variables, next_free_memory_location)
+    if len(variables_to_check_later) != 0:
+        custom_error("Brak deklaracji zmiennej " + variables_to_check_later[0])
+    prog = Program(p[4], variables, next_free_memory_location, output_file_name)
     prog.execute_commands()
 
 
@@ -295,6 +297,7 @@ def custom_error(message: str):
     global flg_error
     print("ERROR: " + message)
     flg_error == 0
+    exit()
 
 
 def p_error(p):
@@ -308,6 +311,7 @@ next_free_memory_location = 0
 variables = {}
 variables_to_check_later = []
 
+output_file_name = ""
 
 # Starting lex and yacc
 if __name__ == '__main__':
@@ -318,5 +322,5 @@ if __name__ == '__main__':
     data = ""
     with open(argv[1], "r") as file:
         data = file.read()
-
+    output_file_name = argv[2]
     yacc.parse(data)

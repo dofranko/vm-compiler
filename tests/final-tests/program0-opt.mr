@@ -1,0 +1,19 @@
+(zapis binarny liczby - zoptymalizowany)
+RESET a		(p[0] <- 0)
+STORE a a
+INC a		(p[1] <- 1)
+STORE a a
+INC a		(p[2] <- read n)
+GET a
+LOAD a a	(a <- p[2])
+RESET b
+JODD a 3
+PUT b		(write p[0])
+JUMP 4
+INC b
+PUT b		(write p[1])
+DEC b
+SHR a		(a <- a/2)
+JZERO a 2	(a=0 - until)
+JUMP -8		(goto repeat)
+HALT

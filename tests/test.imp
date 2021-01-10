@@ -1,0 +1,15 @@
+[ arithm1.imp - operacje arytmetyczne cz. 1 
+
+        Przykladowe dane testowe:
+        1. ? 1234
+           > 55
+        2. ? 131
+           > 55
+]
+DECLARE
+	a, b,c
+BEGIN
+	 READ a;
+    READ b;
+END
+

@@ -1,0 +1,28 @@
+[ tab3.imp - duuuuuze tablice 
+
+        Przykladowe dane testowe:
+        1. ? 0         | 2. ? 7777      | 3. ? 654321
+           ? 9         |    ? 9         |    ? 3           
+           > 909090909 |    > 909090909 |    > 909090909           
+           > 101010101 |    > 101010101 |    > 303030303    
+]
+DECLARE
+  tab(0:1325476980), a, b, c, d, n 
+BEGIN
+  READ a;
+  tab(a) := 9;
+
+  n := 1325476980;
+  tab(n) := tab(a);
+  
+  b :=  111111111;
+  b := b * tab(a);
+  
+  c := 90909090;
+  READ d;
+  
+  tab(a) := b - c;
+  tab(n) := tab(a) / d;
+  WRITE tab(a);
+  WRITE tab(n);
+END 

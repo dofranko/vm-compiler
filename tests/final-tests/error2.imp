@@ -1,0 +1,7 @@
+[ Błąd w linii 5: niezadeklarowana zmienna a ]
+DECLARE
+  b
+BEGIN
+  READ a;
+  b := a;
+END

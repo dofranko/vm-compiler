@@ -1,0 +1,39 @@
+[ arithm1.imp - operacje arytmetyczne cz. 1 
+
+        Przykladowe dane testowe:
+        1. ? 1234
+           > 55
+        2. ? 131
+           > 55
+]
+DECLARE
+	a, b, c, d, j, t
+BEGIN
+	a := 17822;
+	c := 55;
+	d := 2;
+	j := 1;
+
+	READ b;
+	b := b + d;
+	IF b > a THEN
+		t := b;
+		b := a;
+		a := t;
+	ELSE
+		IF b = a THEN
+			b := b - j;
+		ENDIF
+	ENDIF
+
+	FOR i FROM 1000 DOWNTO 1 DO
+		t := b / a;
+		c := c + t;
+		c := j * c;
+		b := d + b;
+		a := d + a;
+	ENDFOR
+	WRITE c;
+
+END
+

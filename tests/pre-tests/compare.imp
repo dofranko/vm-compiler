@@ -1,0 +1,41 @@
+[ compare.imp - testowanie porownan 
+
+        Przykladowe dane testowe:
+        1. ? 0 | 2. ? 1 | 3. ? 1 | 4. ? 2 | 5. ? 1 | 6. ? 0    
+           ? 1 |    ? 2 |    ? 0 |    ? 1 |    ? 1 |    ? 0
+           > 2 |    > 2 |    > 2 |    > 2 |    > 1 |    > 1
+           > 3 |    > 3 |    > 5 |    > 5 |    > 4 |    > 4
+           > 4 |    > 4 |    > 6 |    > 6 |    > 6 |    > 6
+]
+DECLARE
+	a, b[ !,@#$%^&*{}<>?/(){{:;'"-_+=|\~` 	*} ]
+BEGIN
+	READ a;
+	READ b;
+	
+	IF a = b THEN
+		WRITE 1;
+	ENDIF
+
+	IF a != b THEN
+		WRITE 2;
+	ENDIF
+
+	IF a < b THEN  [**********///////////""""""":::::::<<:;:,;,;,;;;,;,;;,*]
+		WRITE 3;
+	ENDIF
+
+	IF a <= b THEN
+		WRITE 4;
+	ENDIF
+
+	IF a > b THEN
+		WRITE 5;
+	ENDIF
+
+	IF a >= b THEN
+		WRITE 6;
+	ENDIF
+
+END
+

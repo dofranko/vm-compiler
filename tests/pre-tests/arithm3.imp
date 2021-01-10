@@ -1,0 +1,36 @@
+[ arithm3.imp - operacje arytmetyczne cz. 3 
+
+        Przykladowe dane testowe:
+        1. ? 1234
+           ? 55
+           > 1033
+           > 0
+           > 533555
+        2. ? 131
+           ? 55
+           > 1030
+           > 0
+           > 530555
+]
+DECLARE
+	b, c, j, t
+BEGIN
+	j := 1111111 - 1111110; [ j = 1 ]
+	READ b; 
+	READ c;
+	IF b > 50 THEN
+		b := b % 50;
+	ENDIF
+	t := b + 1000;
+	t := t - 1;
+	WRITE t;
+	FOR i FROM b TO t DO
+		t := i / j;
+		c := c + t;
+		t := i % i;
+		c := c + t;
+	ENDFOR
+	WRITE t;
+	WRITE c;
+END
+

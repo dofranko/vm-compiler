@@ -1,0 +1,28 @@
+[ cond2.imp - porownania 
+
+        Przykladowe dane testowe:
+        1. ? 2 | 2. ? 1
+           ? 1 |    ? 2
+           > 0 |    > 1
+           > 2 |    > 0
+]
+DECLARE
+	a(999999:999999), b(888888:888888)
+BEGIN
+	READ a(999999);
+	READ b(888888);
+	
+	IF a(999999) > b(888888) THEN
+		WRITE 0;	
+	ELSE
+		WRITE 1;
+	ENDIF
+
+	IF b(888888) < a(999999) THEN
+		WRITE 2;
+	ELSE
+		WRITE 0;
+	ENDIF
+
+END
+

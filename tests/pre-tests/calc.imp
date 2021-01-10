@@ -1,0 +1,26 @@
+[ calc.imp - pewne obliczenia 
+
+        Przykladowe dane testowe:
+        1. ? 2345
+           ? 12
+           > 2345
+]
+DECLARE
+	a, aa, b, c, d, j, p, q, r
+BEGIN
+	READ a;
+	READ aa;
+	b := 454;
+	c := 1412111674;
+	d := 987654321 - 987656789; [d = 0]
+	j := 999000001;
+	FOR i FROM j TO 999100000 DO
+		p := i * b;
+		q := p % aa;
+		r := c / q;
+		d := d + r;
+	ENDFOR
+	
+	WRITE a; [ a jest wczytywana w linii 5 i nie jest wykorzystywana w obliczeniach ]
+END
+

@@ -1,0 +1,16 @@
+[ error14.imp - niezainicjalizowana zmienna w zakresie petli ]
+DECLARE
+	a, b, c
+BEGIN
+	a := 1;
+
+	FOR i FROM a DOWNTO b DO
+		c := a + i;
+		a := a * 7;
+	ENDFOR
+
+	WRITE a;
+	WRITE c;
+
+END
+
