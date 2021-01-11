@@ -13,26 +13,33 @@ class Variable:
 
 class VariableOfArray(Variable):
 
-    def __init__(self, pid, memory_location_start, index):
-        self.pid = pid
-        self.memory_location_start = memory_location_start
+    def __init__(self, array, index):
+        self.array = array
         self.index = index
 
 
 class ArrayOfVariables(Variable):
 
     def __init__(self, pid, memory_location, start, end):
+        if start > end:
+            raise IncorrectIndexRangeError
         self.pid = pid
         self.start = start
         self.end = end
-        self.length = end - start
-        self.isInitialized = False
+        self.length = end - start + 1
+        self.is_initialized = True
         self.memory_location = memory_location
-        self.variables = [Variable(pid + "[" + str(i+1) + "]", memory_location+i)
-                          for i in range(self.length)]
+        self.variables = dict()
+        for var in self.variables:
+            var.is_initialized = True
 
     def at_index(self, index: int):
-        return self.variables[index-self.start]
+        if not self.start <= index <= self.end:
+            raise IndexError
+        my_index = index-self.start
+        if my_index not in self.variables:
+            self.variables[my_index] = Variable(self.pid+"[" + str(my_index) + "]", self.memory_location+my_index)
+        return self.variables[my_index]
 
 
 class VariableIterator(Variable):
@@ -45,3 +52,6 @@ class VariableIterator(Variable):
         self.memory_location = memory_location
         self.is_in_register = False
         self.register_location = None
+
+class IncorrectIndexRangeError(Exception):
+    pass

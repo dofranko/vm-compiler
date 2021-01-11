@@ -19,9 +19,10 @@ def load_value_to_register(value, register, do_variablearray_memory = False, sec
         return code
     elif type(value) == str:
         iterator = [
-            el for el in commander.Program.iterators_stack if el.pid == value][0]
+            el for el in commander.Program.iterators_stack if el.pid == value]
         if not iterator:
-            raise NotImplementedError  # TODO
+            raise NoSuchVariable(value)  # TODO
+        iterator = iterator[0]
         code = load_value_to_register(iterator.memory_location, register)
         if not do_iterator_memory:
             code.append("LOAD " + register + " " + register)
@@ -60,3 +61,7 @@ def generate_number(value: int, register):
             if i < len(value_in_binary) - 1:
                 code.append("SHL " + register)
     return code
+
+
+class NoSuchVariable(Exception):
+    pass

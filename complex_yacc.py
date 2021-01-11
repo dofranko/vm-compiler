@@ -4,7 +4,7 @@ from comp_lex import *
 from variables import *
 from commander import *
 from conditioner import *
-
+from helping_functions import NoSuchVariable
 
 def add_variable(pid):
     global next_free_memory_location
@@ -13,17 +13,20 @@ def add_variable(pid):
         next_free_memory_location += 1
         variables[var.pid] = var
     else:
-        custom_error("Duplikat pid juz istnieje")
+        custom_error("Duplikat deklaracji " + pid )
 
 
 def add_array_of_variables(pid, start, end):
     global next_free_memory_location
     if pid not in variables:
-        var = ArrayOfVariables(pid, next_free_memory_location, start, end)
+        try:
+            var = ArrayOfVariables(pid, next_free_memory_location, start, end)
+        except IncorrectIndexRangeError:
+            custom_error("Nieprawidłowy zakres tablicy")
         next_free_memory_location += var.length
         variables[var.pid] = var
     else:
-        custom_error("Duplikat pid juz istnieje")
+        custom_error("Duplikat deklaracji " + pid )
 
 
 def load_variable(pid):
@@ -31,7 +34,7 @@ def load_variable(pid):
         variables_to_check_later.append(pid)
         return pid
     if isinstance(variables[pid], ArrayOfVariables):
-        custom_error("Odwołanie się do tablicy jak do zmiennej")
+        custom_error("Nieprawidłowe użycie zmiennej " + pid)
     return variables[pid]
 
 
@@ -39,7 +42,7 @@ def load_variable_from_array(pid, position):
     if pid not in variables:
         custom_error("Brak deklaracji tablicy " + pid)
     if type(variables[pid]) == Variable:
-        custom_error("Odwołanie do tablicy jak do zmiennej")
+        custom_error("Nieprawidłowe użycie zmiennej " + pid)
     
     array = variables[pid]
         
@@ -50,6 +53,7 @@ def load_variable_from_array(pid, position):
             custom_error("Index poza zasięgiem")
     elif type(position) == str:
         position = load_variable(position)
+        check_initialization(position)
         return VariableOfArray(array, position)
 
 
@@ -85,6 +89,8 @@ def p_declare_begin_end(p):
         prog.execute_commands()
     except IteratorAlreadyExists:
         custom_error("Powtórnie użyto iteratora")
+    except NoSuchVariable as e:
+        custom_error("Błędne użycie zmiennej: " + str(e))
 
 
 def p_begin_end(p):
@@ -139,9 +145,9 @@ def p_commands_command(p):
 def p_command_identifier_expression(p):
     '''command : identifier ASSIGN expression SEMICOLON'''
     if type(p[1]) == str and p[1] in variables_to_check_later:
-        custom_error("Nie mozna przypisac do iteratora: " + p[1])
+        custom_error("Błąd operacji przypisania do: " + p[1])
     elif type(p[1]) == str:
-        custom_error("Nie mozna przypisac do zmiennej " + p[1])
+        custom_error("Błąd operacji przypisania do: " + p[1])
     initialize_variable(p[1])
     p[0] = AssignCommand(p[1], p[3])
 
@@ -187,9 +193,9 @@ def p_command_for_from_downto_do(p):
 def p_command_read(p):
     '''command : READ identifier SEMICOLON'''
     if type(p[2]) == str and p[2] in variables_to_check_later:
-        custom_error("Nie mozna przypisac do iteratora: " + p[2])
+        custom_error("Błąd operacji odczytu z: " + p[2])
     elif type(p[2]) == str:
-        custom_error("Nie mozna przypisac do zmiennej " + p[2])
+        custom_error("Błąd operacji odczytu z: " + p[2])
     initialize_variable(p[2])
     p[0] = ReadCommand(p[2])
 
@@ -315,7 +321,8 @@ def custom_error(message: str):
 
 def p_error(p):
     if flg_error == 0:
-        print("Error: syntax error")
+        print("ERROR: Błąd składni")
+        exit()
 
 
 # Globals

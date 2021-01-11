@@ -54,7 +54,7 @@ class SubExpression(Expression):
 
 
 class MulExpression(Expression):
-
+    # TODO przemienność mnożenia
     def generate_code(self, register):
         register = "b"
         second_register = "b" if register != "b" else "c"
@@ -71,6 +71,32 @@ class MulExpression(Expression):
             elif self.variable1 == 0:
                 return ["RESET " + register]
         code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register)
+        
+        
+        code.append("JZERO b 31") # czy first = 0
+        code.append("DEC b")
+        code.append("JZERO b 2") #czy first = 1?
+        code.append("JUMP 3") #gdy first > 1
+        code.append("ADD b c")
+        code.append("JUMP 26")
+        
+        code.append("INC b") #restore first
+        
+        code.append("JZERO c 2") # czy second = 0
+        code.append("JUMP 3")  
+        code.append("RESET b")
+        code.append("JUMP 21")
+        code.append("DEC c")
+        code.append("JZERO c 19") #czy second = 1?
+        code.append("INC c")
+        
+        code.append("RESET d") # Sprawdzenie któa większa
+        code.append("ADD d c")
+        code.append("SUB d b")
+        code.append("JZERO d 5")   #jump jeśli B-first, C-second, D-second<first
+        code.append("RESET c")     #Przed tym: B-first, C-second, D-second-first
+        code.append("ADD c b")
+        code.append("ADD b d")
         code.append("RESET d")
         # mnożenie
         code.append("JODD c 5")
@@ -90,7 +116,7 @@ class DivExpression(Expression):
         register = "b"
         second_register = "b" if register != "b" else "c"
         if type(self.variable1) == int and type(self.variable2) == int:
-            return load_value_to_register(self.variable1 // self.variable2, register)
+            return load_value_to_register(self.variable1 // self.variable2 if self.variable2!=0 else 0, register)
         elif isinstance(self.variable1, Variable) and type(self.variable2) == int:
             if self.variable2 == 0:
                 return ["RESET a"]
@@ -155,7 +181,7 @@ class ModExpression(Expression):
         register = "b"
         second_register = "b" if register != "b" else "c"
         if type(self.variable1) == int and type(self.variable2) == int:
-            return load_value_to_register(self.variable1 % self.variable2, register)
+            return load_value_to_register(self.variable1 % self.variable2 if self.variable2!=0 else 0, register)
         elif isinstance(self.variable1, Variable) and type(self.variable2) == int:
             if self.variable2 == 0 or self.variable2 == 1:
                 return ["RESET b"]
