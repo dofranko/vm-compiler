@@ -30,7 +30,6 @@ class Program:
             if isinstance(i, Command):
                 i.generate_code()
                 code += "\n".join(i.code) + "\n"
-                print("\n".join(i.code))
         with open(self.output_file_name, "w") as file:
             file.write(code)
         

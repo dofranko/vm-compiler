@@ -30,8 +30,6 @@ class ArrayOfVariables(Variable):
         self.is_initialized = True
         self.memory_location = memory_location
         self.variables = dict()
-        for var in self.variables:
-            var.is_initialized = True
 
     def at_index(self, index: int):
         if not self.start <= index <= self.end:
@@ -39,6 +37,7 @@ class ArrayOfVariables(Variable):
         my_index = index-self.start
         if my_index not in self.variables:
             self.variables[my_index] = Variable(self.pid+"[" + str(my_index) + "]", self.memory_location+my_index)
+            self.variables[my_index].is_initialized = True
         return self.variables[my_index]
 
 
