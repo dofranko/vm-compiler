@@ -24,17 +24,16 @@ class Program:
 
     def execute_commands(self):
         self.commands.append(HaltCommand())
-        try:
-            code = ""
-            for i in self.commands:
-                if isinstance(i, Command):
-                    i.generate_code()
-                    code += "\n".join(i.code) + "\n"
-                    print("\n".join(i.code))
-            with open(self.output_file_name, "w") as file:
-                file.write(code)
-        except Exception as e:
-            print(e)
+        
+        code = ""
+        for i in self.commands:
+            if isinstance(i, Command):
+                i.generate_code()
+                code += "\n".join(i.code) + "\n"
+                print("\n".join(i.code))
+        with open(self.output_file_name, "w") as file:
+            file.write(code)
+        
 
 
 class Command:
@@ -63,11 +62,21 @@ class WriteCommand(Command):
 
     def generate_code(self):
         if type(self.variable) == int:
-            pass
-        elif isinstance(self.variable, Variable):
+            # TODO
+            self.code = []
+            self.code.extend(load_value_to_register(self.variable, "b"))
+            self.code.extend(["RESET a", "STORE b a", "PUT a"])
+        elif type(self.variable) == Variable:
             self.code = load_value_to_register(
-                self.variable, "a")
+                self.variable.memory_location, "a")
             self.code.append("PUT " + "a")
+        elif type(self.variable) == VariableOfArray:
+            self.code = load_value_to_register(self.variable, "a", do_variablearray_memory=True)
+            # Actually.. it loaded only location of variable to register "a" 
+            self.code.append("PUT a")
+        elif type(self.variable) == str:
+            self.code = load_value_to_register(self.variable, "a", do_iterator_memory=True)
+            self.code.append("PUT a")
 
 
 class ReadCommand(Command):
@@ -90,10 +99,13 @@ class AssignCommand(Command):
         self.code = []
 
     def generate_code(self, register="b"):
-        self.code = self.expression.generate_code("b")
-        self.code.extend(load_value_to_register(
-            self.variable, "a"))
-        self.code.append("STORE " + register + " a")
+        if type(self.variable) == VariableOfArray:
+            self.code = load_value_to_register(self.variable, "a", do_variablearray_memory=True)
+        else:
+            self.code = load_value_to_register(
+                self.variable.memory_location, "a")
+        self.code.extend(self.expression.generate_code("b"))
+        self.code.append("STORE b a")
 
 
 class IfCommand(Command):
@@ -105,12 +117,12 @@ class IfCommand(Command):
 
     def generate_code(self, register="a"):
         commands_code = []
-        code = []
+        self.code = []
         for command in self.commands:
             command.generate_code()
             commands_code.extend(command.code)
-        code = self.condition.generate_code(len(commands_code)+1)
-        code.extend(commands_code)
+        self.code = self.condition.generate_code(len(commands_code)+1)
+        self.code.extend(commands_code)
 
 
 class IfElseCommand(Command):
@@ -132,8 +144,9 @@ class IfElseCommand(Command):
             command.generate_code()
             commands_else_code.extend(command.code)
 
-        self.code = self.condition.generate_code(len(commands_if_code)+1)
+        self.code = self.condition.generate_code(len(commands_if_code)+2)
         self.code.extend(commands_if_code)
+        self.code.append("JUMP " + str(len(commands_else_code) + 1))
         self.code.extend(commands_else_code)
 
 
@@ -211,7 +224,7 @@ class ForCommand(Command):
             ["LOAD e d", "INC d", "LOAD f d", "DEC d", "INC e"])
         # --- przeskok z warunku poza for'a
         # +1 żeby poza kod, +1 żeby ponad jumpa
-        condition_code.append("JZERO f " + str(len(sub_commands_code)+2))
+        condition_code.append("JZERO f " + str(len(sub_commands_code)+len(incrementation_code)+2))
         # --- przeskok do sprawdzania warunku
         jump_code = "JUMP " + \
             str(-(len(sub_commands_code) +
@@ -251,19 +264,19 @@ class ForDownCommand(Command):
         # --- kod sprawdzenia warunku
         condition_code = ["INC e", "SUB e f"]
         # --- kody podkomend + store iteratora z przywróceniem
-        sub_commands_code = ["ADD e f", "DEC e", "DEC e", "STORE e d"]
+        sub_commands_code = ["ADD e f", "DEC e",  "STORE e d"]
         for command in self.commands:
             command.generate_code()
             sub_commands_code.extend(command.code)
         # --- kod inkrementacji iteratora
         incrementation_code = load_value_to_register(
             my_iterator.memory_location, "d")
-        incrementation_code.extend(
-            ["LOAD e d", "JZERO e " + str(1+len(jump_code)), "INC d", "LOAD f d", "DEC d"])  # +1 poza kod, +1 poza jump_code
+        incrementation_code.extend( # +1 poza kod, +1 poza jump_code, +4 poza kod w swojej tablicy
+            ["LOAD e d", "JZERO e " + str(1+1+4), "INC d", "LOAD f d", "DEC d", "DEC e"])  
         # --- przeskok z warunku poza for'a
         # +1 żeby poza kod, +1 żeby ponad jumpa
         condition_code.append(
-            "JZERO e " + str(len(sub_commands_code) + 2))
+            "JZERO e " + str(len(sub_commands_code) + len(incrementation_code) + 2))
         # --- przeskok do sprawdzania warunku
         jump_code = "JUMP " + \
             str(-(len(sub_commands_code) +
@@ -283,8 +296,10 @@ def add_iterator(pid, start, end):
     iterator = VariableIterator(
         pid, Program.next_free_memory_location, start, end)
     Program.next_free_memory_location += 2
-    if [el for el in commander.Program.iterators_stack if el.pid == value][0]:
-        Program.iterators_stack.append(iterator)
+    if [el for el in commander.Program.iterators_stack if el.pid == pid]:
+        raise IteratorAlreadyExists
+    
+    Program.iterators_stack.append(iterator)
     if pid in Program.variables:
         Program.variables[pid].is_shadowed = True
         Program.variables[pid].reference_to_iterator = iterator
@@ -296,3 +311,6 @@ def remove_iterator(iterator: VariableIterator):
     if iterator.pid in Program.variables:
         Program.variables[iterator.pid].is_shadowed = False
         Program.variables[iterator.pid].reference_to_iterator = None
+
+class IteratorAlreadyExists(Exception):
+    pass

@@ -36,14 +36,21 @@ def load_variable(pid):
 
 
 def load_variable_from_array(pid, position):
+    if pid not in variables:
+        custom_error("Brak deklaracji tablicy " + pid)
+    if type(variables[pid]) == Variable:
+        custom_error("Odwołanie do tablicy jak do zmiennej")
+    
+    array = variables[pid]
+        
     if type(position) == int:
-        array = load_variable(pid)
         try:
             return array.at_index(position)
         except IndexError:
             custom_error("Index poza zasięgiem")
-    elif isinstance(position, Variable):
-        pass
+    elif type(position) == str:
+        position = load_variable(position)
+        return VariableOfArray(array, position)
 
 
 def initialize_variable(variable):
@@ -74,7 +81,10 @@ def p_declare_begin_end(p):
     if len(variables_to_check_later) != 0:
         custom_error("Brak deklaracji zmiennej " + variables_to_check_later[0])
     prog = Program(p[4], variables, next_free_memory_location, output_file_name)
-    prog.execute_commands()
+    try:
+        prog.execute_commands()
+    except IteratorAlreadyExists:
+        custom_error("Powtórnie użyto iteratora")
 
 
 def p_begin_end(p):
@@ -82,7 +92,10 @@ def p_begin_end(p):
     if len(variables_to_check_later) != 0:
         custom_error("Brak deklaracji zmiennej " + variables_to_check_later[0])
     prog = Program(p[4], variables, next_free_memory_location, output_file_name)
-    prog.execute_commands()
+    try:
+        prog.execute_commands()
+    except IteratorAlreadyExists:
+        custom_error("Powtórnie użyto iteratora")
 
 
 #--------- DECLARATIONS
@@ -182,7 +195,7 @@ def p_command_read(p):
 
 
 def p_command_write(p):
-    '''command : WRITE identifier SEMICOLON'''
+    '''command : WRITE value SEMICOLON'''
     check_initialization(p[2])
     p[0] = WriteCommand(p[2])
 
@@ -307,7 +320,7 @@ def p_error(p):
 
 # Globals
 flg_error = 0       # Flaga erroru - czy był bład, czy nie
-next_free_memory_location = 0
+next_free_memory_location = 1
 variables = {}
 variables_to_check_later = []
 

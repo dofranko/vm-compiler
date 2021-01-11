@@ -29,33 +29,11 @@ class LessCondition(Condition):
                 return []
             else:  # always false
                 return ["JUMP " + self.get_jump_length([])]
-        elif isinstance(self.variable1, Variable) and type(self.variable2) == int:
-            if type(self.variable1) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_value_to_register(
-                    self.variable2, second_register))
-                code.append("SUB " + second_register + " " + register)
-                code.append("JZERO " + second_register +
-                            " " + self.get_jump_length(code))
-                return code
-        elif type(self.variable1) == int and isinstance(self.variable2, Variable):
-            if type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable2, register)
-                code.extend(load_value_to_register(
-                    self.variable1, second_register))
-                code.append("SUB " + second_register + " " + register)
-                code.append("JZERO " + second_register +
-                            " " + self.get_jump_length(code))
-                return code
-        elif isinstance(self.variable1, Variable) and isinstance(self.variable2, Variable):
-            if type(self.variable1) == Variable and type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_variable_to_register(
-                    self.variable2, second_register))
-                code.append("SUB " + second_register + " " + register)
-                code.append("JZERO " + second_register +
-                            " " + self.get_jump_length(code))
-                return code
+        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register, "c")
+        code.append("SUB " + second_register + " " + register)
+        code.append("JZERO " + second_register +
+                    " " + self.get_jump_length(code)) #when false, jump to else/end
+        return code
 
 
 class GreaterCondition(Condition):
@@ -67,34 +45,12 @@ class GreaterCondition(Condition):
             if self.variable1 > self.variable2:  # when always true
                 return []
             else:  # always false
-                return ["JUMP " + jump_length]
-        elif isinstance(self.variable1, Variable) and type(self.variable2) == int:
-            if type(self.variable1) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_value_to_register(
-                    self.variable2, second_register))
-                code.append("SUB " + register + " " + second_register)
-                code.append("JZERO " + register + " " +
-                            self.get_jump_length(code))
-                return code
-        elif type(self.variable1) == int and isinstance(self.variable2, Variable):
-            if type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable2, register)
-                code.extend(load_value_to_register(
-                    self.variable1, second_register))
-                code.append("SUB " + register + " " + second_register)
-                code.append("JZERO " + register + " " +
-                            self.get_jump_length(code))
-                return code
-        elif isinstance(self.variable1, Variable) and isinstance(self.variable2, Variable):
-            if type(self.variable1) == Variable and type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_variable_to_register(
-                    self.variable2, second_register))
-                code.append("SUB " + register + " " + second_register)
-                code.append("JZERO " + register + " " +
-                            self.get_jump_length(code))
-                return code
+                return ["JUMP " + self.get_jump_length([])]
+        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register, "c")
+        code.append("SUB " + register + " " + second_register)
+        code.append("JZERO " + register + " " +
+                    self.get_jump_length(code)) #when false, jump to else/end
+        return code
 
 
 class LessEqualsCondition(Condition):
@@ -106,37 +62,14 @@ class LessEqualsCondition(Condition):
             if self.variable1 <= self.variable2:  # when always true
                 return []
             else:  # always false
-                return ["JUMP " + jump_length]
-        elif isinstance(self.variable1, Variable) and type(self.variable2) == int:
-            if type(self.variable1) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_value_to_register(
-                    self.variable2, second_register))
-                code.append("INC " + second_register)
-                code.append("SUB " + second_register + " " + register)
-                code.append("JZERO " + second_register +
-                            " " + self.get_jump_length(code))
-                return code
-        elif type(self.variable1) == int and isinstance(self.variable2, Variable):
-            if type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable2, register)
-                code.extend(load_value_to_register(
-                    self.variable1, second_register))
-                code.append("INC " + second_register)
-                code.append("SUB " + second_register + " " + register)
-                code.append("JZERO " + second_register +
-                            " " + self.get_jump_length(code))
-                return code
-        elif isinstance(self.variable1, Variable) and isinstance(self.variable2, Variable):
-            if type(self.variable1) == Variable and type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_variable_to_register(
-                    self.variable2, second_register))
-                code.append("INC " + second_register)
-                code.append("SUB " + second_register + " " + register)
-                code.append("JZERO " + second_register +
-                            " " + self.get_jump_length(code))
-                return code
+                return ["JUMP " + self.get_jump_length([])]
+        
+        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register, "c")
+        code.append("INC " + second_register)
+        code.append("SUB " + second_register + " " + register)
+        code.append("JZERO " + second_register +
+                    " " + self.get_jump_length(code))
+        return code
 
 
 class GreaterEqualsCondition(Condition):
@@ -148,37 +81,14 @@ class GreaterEqualsCondition(Condition):
             if self.variable1 >= self.variable2:  # when always true
                 return []
             else:  # always false
-                return ["JUMP " + jump_length]
-        elif isinstance(self.variable1, Variable) and type(self.variable2) == int:
-            if type(self.variable1) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_value_to_register(
-                    self.variable2, second_register))
-                code.append("INC " + register)
-                code.append("SUB " + register + " " + second_register)
-                code.append("JZERO " + register + " " +
-                            self.get_jump_length(code))
-                return code
-        elif type(self.variable1) == int and isinstance(self.variable2, Variable):
-            if type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable2, register)
-                code.extend(load_value_to_register(
-                    self.variable1, second_register))
-                code.append("INC " + register)
-                code.append("SUB " + register + " " + second_register)
-                code.append("JZERO " + register + " " +
-                            self.get_jump_length(code))
-                return code
-        elif isinstance(self.variable1, Variable) and isinstance(self.variable2, Variable):
-            if type(self.variable1) == Variable and type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_variable_to_register(
-                    self.variable2, second_register))
-                code.append("INC " + register)
-                code.append("SUB " + register + " " + second_register)
-                code.append("JZERO " + register + " " +
-                            self.get_jump_length(code))
-                return code
+                return ["JUMP " + self.get_jump_length([])]
+        
+        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register, "c")
+        code.append("INC " + register)
+        code.append("SUB " + register + " " + second_register)
+        code.append("JZERO " + register + " " +
+                    self.get_jump_length(code))
+        return code
 
 
 class EqualsCondition(Condition):
@@ -193,7 +103,7 @@ class EqualsCondition(Condition):
         if self.jump_length > 0:
             return str(self.jump_length)
         elif self.jump_length < 0:
-            return str(self.jump_length - len(code1) - len(code2) + 1)
+            return str(self.jump_length - len(code1) - len(code2) + 1) # +1 gdyż nie liczymy instr JUMP do len()
 
     def generate_code(self, jump_length, register="a", second_register="b", third_register="c"):
         self.jump_length = jump_length
@@ -202,59 +112,26 @@ class EqualsCondition(Condition):
             if self.variable1 == self.variable2:  # when always true
                 return []
             else:  # always false
-                return ["JUMP " + jump_length]
-        elif isinstance(self.variable1, Variable) and type(self.variable2) == int:
-            if type(self.variable1) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_value_to_register(
-                    self.variable2, second_register))
-                code.append("RESET c")
-                code.append("ADD c a")  # a<-first, b<-second, c<-first
-                code.append("SUB a b")
-                code.append("JZERO a 2")
-                # tutaj jeszcze jest dodawane
-                code2 = ["SUB b c", "JZERO b 2", "JUMP "]
-                code.append("JUMP " + self.get_jump_length_first(code, code2))
-                code2[-1] += self.get_jump_length_second(code, code2)
-                code.extend(code2)
-                return code
-        elif type(self.variable1) == int and isinstance(self.variable2, Variable):
-            if type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable2, register)
-                code.extend(load_value_to_register(
-                    self.variable1, second_register))
-                code.append("RESET c")
-                code.append("ADD c a")  # a<-first, b<-second, c<-first
-                code.append("SUB a b")
-                code.append("JZERO a 2")
-                # tutaj jeszcze jest dodawane
-                code2 = ["SUB b c", "JZERO b 2", "JUMP "]
-                code.append("JUMP " + self.get_jump_length_first(code, code2))
-                code2[-1] = self.get_jump_length_second(code, code2)
-                code.extend(code2)
-                return code
-        elif isinstance(self.variable1, Variable) and isinstance(self.variable2, Variable):
-            if type(self.variable1) == Variable and type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_variable_to_register(
-                    self.variable2, second_register))
-                code.append("RESET c")
-                code.append("ADD c a")  # a<-first, b<-second, c<-first
-                code.append("SUB a b")
-                code.append("JZERO a 2")
-                # tutaj jeszcze jest dodawane
-                code2 = ["SUB b c", "JZERO b 2", "JUMP "]
-                code.append("JUMP " + self.get_jump_length_first(code, code2))
-                code2[-1] += self.get_jump_length_second(code, code2)
-                code.extend(code2)
-                return code
+                return ["JUMP " + self.get_jump_length([])]
+
+        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register, "c")
+        code.append("RESET c")
+        code.append("ADD c a")  # a<-first, b<-second, c<-first
+        code.append("SUB a b")
+        code.append("JZERO a 2")
+        # tutaj jeszcze jest dodawane
+        code2 = ["SUB b c", "JZERO b 2", "JUMP "]
+        code.append("JUMP " + self.get_jump_length_first(code, code2))
+        code2[-1] += self.get_jump_length_second(code, code2) # add jump length
+        code.extend(code2)
+        return code
 
 
 class NotEqualsCondition(Condition):
 
     def get_jump_length_first(self, code1: list, code2: list):
         if self.jump_length > 0:
-            return str(self.jump_length + len(code2))
+            return str(len(code2) + 1)
         elif self.jump_length < 0:
             return str(self.jump_length - len(code1))
 
@@ -271,49 +148,16 @@ class NotEqualsCondition(Condition):
             if self.variable1 != self.variable2:  # when always true
                 return []
             else:  # always false
-                return ["JUMP " + jump_length]
-        elif isinstance(self.variable1, Variable) and type(self.variable2) == int:
-            if type(self.variable1) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_value_to_register(
-                    self.variable2, second_register))
-                code.append("RESET c")
-                code.append("ADD c a")  # a<-first, b<-second, c<-first
-                code.append("SUB a b")
-                code.append("JZERO a 2")
-                # tutaj jeszcze jest dodawane
-                code2 = ["SUB b c", "JZERO b "]
-                code.append("JUMP " + self.get_jump_length_first(code, code2))
-                code2[-1] += self.get_jump_length_second(code, code2)
-                code.extend(code2)
-                return code
-        elif type(self.variable1) == int and isinstance(self.variable2, Variable):
-            if type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable2, register)
-                code.extend(load_value_to_register(
-                    self.variable1, second_register))
-                code.append("RESET c")
-                code.append("ADD c a")  # a<-first, b<-second, c<-first
-                code.append("SUB a b")
-                code.append("JZERO a 2")
-                # tutaj jeszcze jest dodawane
-                code2 = ["SUB b c", "JZERO b "]
-                code.append("JUMP " + self.get_jump_length_first(code, code2))
-                code2[-1] += self.get_jump_length_second(code, code2)
-                code.extend(code2)
-                return code
-        elif isinstance(self.variable1, Variable) and isinstance(self.variable2, Variable):
-            if type(self.variable1) == Variable and type(self.variable2) == Variable:
-                code = load_variable_to_register(self.variable1, register)
-                code.extend(load_variable_to_register(
-                    self.variable2, second_register))
-                code.append("RESET c")
-                code.append("ADD c a")  # a<-first, b<-second, c<-first
-                code.append("SUB a b")
-                code.append("JZERO a 2")
-                # tutaj jeszcze jest dodawane
-                code2 = ["SUB b c", "JZERO b "]
-                code.append("JUMP " + self.get_jump_length_first(code, code2))
-                code2[-1] += self.get_jump_length_second(code, code2)
-                code.extend(code2)
-                return code
+                return ["JUMP " + self.get_jump_length([])]
+        
+        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register, "c")
+        code.append("RESET c")
+        code.append("ADD c a")  # a<-first, b<-second, c<-first
+        code.append("SUB a b")
+        code.append("JZERO a 2")
+        # tutaj jeszcze jest dodawane
+        code2 = ["SUB b c", "JZERO b "]
+        code.append("JUMP " + self.get_jump_length_first(code, code2))
+        code2[-1] += self.get_jump_length_second(code, code2)
+        code.extend(code2)
+        return code
