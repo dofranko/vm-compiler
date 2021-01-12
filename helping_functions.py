@@ -2,7 +2,7 @@ from variables import *
 import commander
 
 
-def load_value_to_register(value, register, do_variablearray_memory = False, second_register="c", do_iterator_memory = False):
+def load_value_to_register(value, register, do_variablearray_memory=False, second_register="c", do_iterator_memory=False):
     if type(value) == Variable:
         if not value.is_shadowed:
             code = []
@@ -21,7 +21,7 @@ def load_value_to_register(value, register, do_variablearray_memory = False, sec
         iterator = [
             el for el in commander.Program.iterators_stack if el.pid == value]
         if not iterator:
-            raise NoSuchVariable(value)  # TODO
+            raise NoSuchVariable(value)
         iterator = iterator[0]
         code = load_value_to_register(iterator.memory_location, register)
         if not do_iterator_memory:
@@ -36,16 +36,18 @@ def load_value_to_register(value, register, do_variablearray_memory = False, sec
         if not do_variablearray_memory:
             code.append("LOAD " + register + " " + register)
         return code
-        
 
 
 def load_variable_to_register(variable, register):
     return load_value_to_register(variable, register)
 
+
 def load_two_values_to_registers(value1, value2, register1="b", register2="c", register3="d"):
     code = load_value_to_register(value1, register1, second_register=register2)
-    code.extend(load_value_to_register(value2, register2, second_register=register3))
+    code.extend(load_value_to_register(
+        value2, register2, second_register=register3))
     return code
+
 
 def generate_number(value: int, register):
     if value <= 0:

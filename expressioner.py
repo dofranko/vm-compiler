@@ -30,7 +30,8 @@ class AddExpression(Expression):
         elif type(self.variable1) == int and isinstance(self.variable2, Variable):
             if self.variable1 == 0:
                 return ValueExpression(self.variable2).generate_code(register)
-        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register)
+        code = load_two_values_to_registers(
+            self.variable1, self.variable2, register, second_register)
         code.append("ADD " + register + " " + second_register)
         return code
 
@@ -48,13 +49,13 @@ class SubExpression(Expression):
         elif type(self.variable1) == int and isinstance(self.variable2, Variable):
             if self.variable1 == 0:
                 return ValueExpression(self.variable2).generate_code(register)
-        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register)
+        code = load_two_values_to_registers(
+            self.variable1, self.variable2, register, second_register)
         code.append("SUB " + register + " " + second_register)
         return code
 
 
 class MulExpression(Expression):
-    # TODO przemienność mnożenia
     def generate_code(self, register):
         register = "b"
         second_register = "b" if register != "b" else "c"
@@ -70,31 +71,32 @@ class MulExpression(Expression):
                 return ValueExpression(self.variable2).generate_code(register)
             elif self.variable1 == 0:
                 return ["RESET " + register]
-        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register)
-        
-        
-        code.append("JZERO b 31") # czy first = 0
+        code = load_two_values_to_registers(
+            self.variable1, self.variable2, register, second_register)
+
+        code.append("JZERO b 31")  # czy first = 0
         code.append("DEC b")
-        code.append("JZERO b 2") #czy first = 1?
-        code.append("JUMP 3") #gdy first > 1
+        code.append("JZERO b 2")  # czy first = 1?
+        code.append("JUMP 3")  # gdy first > 1
         code.append("ADD b c")
         code.append("JUMP 26")
-        
-        code.append("INC b") #restore first
-        
-        code.append("JZERO c 2") # czy second = 0
-        code.append("JUMP 3")  
+
+        code.append("INC b")  # restore first
+
+        code.append("JZERO c 2")  # czy second = 0
+        code.append("JUMP 3")
         code.append("RESET b")
         code.append("JUMP 21")
         code.append("DEC c")
-        code.append("JZERO c 19") #czy second = 1?
+        code.append("JZERO c 19")  # czy second = 1?
         code.append("INC c")
-        
-        code.append("RESET d") # Sprawdzenie któa większa
+
+        code.append("RESET d")  # Sprawdzenie któa większa
         code.append("ADD d c")
         code.append("SUB d b")
-        code.append("JZERO d 5")   #jump jeśli B-first, C-second, D-second<first
-        code.append("RESET c")     #Przed tym: B-first, C-second, D-second-first
+        # jump jeśli B-first, C-second, D-second<first
+        code.append("JZERO d 5")
+        code.append("RESET c")  # Przed tym: B-first, C-second, D-second-first
         code.append("ADD c b")
         code.append("ADD b d")
         code.append("RESET d")
@@ -116,7 +118,7 @@ class DivExpression(Expression):
         register = "b"
         second_register = "b" if register != "b" else "c"
         if type(self.variable1) == int and type(self.variable2) == int:
-            return load_value_to_register(self.variable1 // self.variable2 if self.variable2!=0 else 0, register)
+            return load_value_to_register(self.variable1 // self.variable2 if self.variable2 != 0 else 0, register)
         elif isinstance(self.variable1, Variable) and type(self.variable2) == int:
             if self.variable2 == 0:
                 return ["RESET a"]
@@ -125,16 +127,17 @@ class DivExpression(Expression):
         elif type(self.variable1) == int and isinstance(self.variable2, Variable):
             if self.variable1 == 0:
                 return ["RESET a"]
-            
-        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register)
+
+        code = load_two_values_to_registers(
+            self.variable1, self.variable2, register, second_register)
         code.extend(["RESET d", "RESET e", "RESET f"])
-        
-        code.append("JZERO c 2") #gdy drugi jest 0
+
+        code.append("JZERO c 2")  # gdy drugi jest 0
         code.append("JUMP 3")
         code.append("RESET b")
-        code.append("JUMP 31") #skok ponad wszystko
-        
-        ## sprawdzenie czy 1
+        code.append("JUMP 31")  # skok ponad wszystko
+
+        # sprawdzenie czy 1
         code.append("DEC c")
         code.append("JZERO c 29")
         # sprawdzeie czy 2
@@ -147,8 +150,8 @@ class DivExpression(Expression):
         code.append("JUMP 22")
         #
         ##
-        code.append("INC e") #e=1
-        
+        code.append("INC e")  # e=1
+
         code.append("RESET f")
         code.append("ADD f b")
         code.append("SUB f c")
@@ -166,12 +169,12 @@ class DivExpression(Expression):
         code.append("ADD d e")
         code.append("SHR c")
         code.append("SHR e")
-        code.append("JZERO e 2") #exit
+        code.append("JZERO e 2")  # exit
         code.append("JUMP -10")
-        
+
         code.append("RESET b")
-        code.append("ADD b d")  
-        
+        code.append("ADD b d")
+
         return code
 
 
@@ -181,23 +184,23 @@ class ModExpression(Expression):
         register = "b"
         second_register = "b" if register != "b" else "c"
         if type(self.variable1) == int and type(self.variable2) == int:
-            return load_value_to_register(self.variable1 % self.variable2 if self.variable2!=0 else 0, register)
+            return load_value_to_register(self.variable1 % self.variable2 if self.variable2 != 0 else 0, register)
         elif isinstance(self.variable1, Variable) and type(self.variable2) == int:
             if self.variable2 == 0 or self.variable2 == 1:
                 return ["RESET b"]
         elif type(self.variable1) == int and isinstance(self.variable2, Variable):
             if self.variable1 == 0:
                 return ["RESET b"]
-            
-                
-        code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register)
+
+        code = load_two_values_to_registers(
+            self.variable1, self.variable2, register, second_register)
         code.extend(["RESET d", "RESET e", "RESET f"])
-        code.append("JZERO c 2") #gdy drugi jest 0
+        code.append("JZERO c 2")  # gdy drugi jest 0
         code.append("JUMP 3")
         code.append("RESET b")
-        code.append("JUMP 38") #skok ponad wszystko
-        
-        ## sprawdzenie czy 1
+        code.append("JUMP 38")  # skok ponad wszystko
+
+        # sprawdzenie czy 1
         code.append("DEC c")
         code.append("JZERO c 2")
         code.append("JUMP 3")
@@ -209,17 +212,17 @@ class ModExpression(Expression):
         code.append("INC c")
         code.append("INC c")
         code.append("JUMP 9")
-        code.append("JODD b 3") 
-        code.append("RESET b") 
+        code.append("JODD b 3")
+        code.append("RESET b")
         code.append("JUMP 25")
         code.append("RESET b")
         code.append("INC b")
-        code.append("JUMP 22") 
+        code.append("JUMP 22")
         code.append("INC b")
         code.append("JUMP 20")
 
-        code.append("INC e") #e=1
-        
+        code.append("INC e")  # e=1
+
         code.append("RESET f")
         code.append("ADD f b")
         code.append("SUB f c")
@@ -237,9 +240,7 @@ class ModExpression(Expression):
         code.append("ADD d e")
         code.append("SHR c")
         code.append("SHR e")
-        code.append("JZERO e 2") #exit
+        code.append("JZERO e 2")  # exit
         code.append("JUMP -10")
-        
+
         return code
-
-

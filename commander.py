@@ -24,7 +24,7 @@ class Program:
 
     def execute_commands(self):
         self.commands.append(HaltCommand())
-        
+
         code = ""
         for i in self.commands:
             if isinstance(i, Command):
@@ -32,7 +32,6 @@ class Program:
                 code += "\n".join(i.code) + "\n"
         with open(self.output_file_name, "w") as file:
             file.write(code)
-        
 
 
 class Command:
@@ -61,7 +60,6 @@ class WriteCommand(Command):
 
     def generate_code(self):
         if type(self.variable) == int:
-            # TODO
             self.code = []
             self.code.extend(load_value_to_register(self.variable, "b"))
             self.code.extend(["RESET a", "STORE b a", "PUT a"])
@@ -70,11 +68,13 @@ class WriteCommand(Command):
                 self.variable.memory_location, "a")
             self.code.append("PUT " + "a")
         elif type(self.variable) == VariableOfArray:
-            self.code = load_value_to_register(self.variable, "a", do_variablearray_memory=True)
-            # Actually.. it loaded only location of variable to register "a" 
+            self.code = load_value_to_register(
+                self.variable, "a", do_variablearray_memory=True)
+            # Actually.. it loaded only location of variable to register "a"
             self.code.append("PUT a")
         elif type(self.variable) == str:
-            self.code = load_value_to_register(self.variable, "a", do_iterator_memory=True)
+            self.code = load_value_to_register(
+                self.variable, "a", do_iterator_memory=True)
             self.code.append("PUT a")
 
 
@@ -99,7 +99,8 @@ class AssignCommand(Command):
 
     def generate_code(self, register="b"):
         if type(self.variable) == VariableOfArray:
-            self.code = load_value_to_register(self.variable, "a", do_variablearray_memory=True)
+            self.code = load_value_to_register(
+                self.variable, "a", do_variablearray_memory=True)
         else:
             self.code = load_value_to_register(
                 self.variable.memory_location, "a")
@@ -223,7 +224,8 @@ class ForCommand(Command):
             ["LOAD e d", "INC d", "LOAD f d", "DEC d", "INC e"])
         # --- przeskok z warunku poza for'a
         # +1 żeby poza kod, +1 żeby ponad jumpa
-        condition_code.append("JZERO f " + str(len(sub_commands_code)+len(incrementation_code)+2))
+        condition_code.append(
+            "JZERO f " + str(len(sub_commands_code)+len(incrementation_code)+2))
         # --- przeskok do sprawdzania warunku
         jump_code = "JUMP " + \
             str(-(len(sub_commands_code) +
@@ -270,8 +272,8 @@ class ForDownCommand(Command):
         # --- kod inkrementacji iteratora
         incrementation_code = load_value_to_register(
             my_iterator.memory_location, "d")
-        incrementation_code.extend( # +1 poza kod, +1 poza jump_code, +4 poza kod w swojej tablicy
-            ["LOAD e d", "JZERO e " + str(1+1+4), "INC d", "LOAD f d", "DEC d", "DEC e"])  
+        incrementation_code.extend(  # +1 poza kod, +1 poza jump_code, +4 poza kod w swojej tablicy
+            ["LOAD e d", "JZERO e " + str(1+1+4), "INC d", "LOAD f d", "DEC d", "DEC e"])
         # --- przeskok z warunku poza for'a
         # +1 żeby poza kod, +1 żeby ponad jumpa
         condition_code.append(
@@ -288,8 +290,6 @@ class ForDownCommand(Command):
         self.code.append(jump_code)
         remove_iterator(my_iterator)
 
-# TODO nie wiem co
-
 
 def add_iterator(pid, start, end):
     iterator = VariableIterator(
@@ -297,7 +297,7 @@ def add_iterator(pid, start, end):
     Program.next_free_memory_location += 2
     if [el for el in commander.Program.iterators_stack if el.pid == pid]:
         raise IteratorAlreadyExists
-    
+
     Program.iterators_stack.append(iterator)
     if pid in Program.variables:
         Program.variables[pid].is_shadowed = True
@@ -310,6 +310,7 @@ def remove_iterator(iterator: VariableIterator):
     if iterator.pid in Program.variables:
         Program.variables[iterator.pid].is_shadowed = False
         Program.variables[iterator.pid].reference_to_iterator = None
+
 
 class IteratorAlreadyExists(Exception):
     pass
