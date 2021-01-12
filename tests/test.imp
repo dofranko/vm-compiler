@@ -7,9 +7,19 @@
            > 55
 ]
 DECLARE
-	a, b,c
+	a, aa(0:4), b, c, d
 BEGIN
-	 READ a;
-    READ b;
+   READ a;
+
+	aa(3) := a / 1;
+	WRITE aa(3); [ a ]
+	aa(3) := 1 * a;
+	WRITE aa(3); [ a ]
+	aa(3) := 1 % a;
+	WRITE aa(3); [ a < 2 ? 0 : 1 ]
+   b:=1;
+   c:=2;
+   d:=1%c;
+   WRITE d;
 END
 
