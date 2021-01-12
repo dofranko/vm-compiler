@@ -188,8 +188,7 @@ class ModExpression(Expression):
         elif type(self.variable1) == int and isinstance(self.variable2, Variable):
             if self.variable1 == 0:
                 return ["RESET b"]
-            elif self.variable1 == 1:
-                return ["RESET b", "INC b"]
+            
                 
         code = load_two_values_to_registers(self.variable1, self.variable2, register, second_register)
         code.extend(["RESET d", "RESET e", "RESET f"])
